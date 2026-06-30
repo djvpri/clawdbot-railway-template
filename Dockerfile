@@ -56,11 +56,14 @@ RUN corepack enable && corepack prepare pnpm@10.23.0 --activate
 
 # Persist user-installed tools by default by targeting the Railway volume.
 # - npm global installs -> /data/npm
-# - pnpm global installs -> /data/pnpm (binaries) + /data/pnpm-store (store)
+# - pnpm global installs -> /data/pnpm (binaries)
+# Caches stay off the persistent volume: they are content-addressable stores that
+# grow unbounded (every package version ever installed, e.g. via `openclaw update`)
+# and are safe to lose on redeploy since they just get repopulated on next install.
 ENV NPM_CONFIG_PREFIX=/data/npm
-ENV NPM_CONFIG_CACHE=/data/npm-cache
+ENV NPM_CONFIG_CACHE=/root/.npm-cache
 ENV PNPM_HOME=/data/pnpm
-ENV PNPM_STORE_DIR=/data/pnpm-store
+ENV PNPM_STORE_DIR=/root/.pnpm-store
 ENV PATH="/data/npm/bin:/data/pnpm:${PATH}"
 
 WORKDIR /app
